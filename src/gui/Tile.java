@@ -8,7 +8,7 @@ public class Tile
 		DEFAULT,
 		START,
 		END,
-		OBSTACTLE,
+		OBSTACLE,
 		PATH
 	}
 	

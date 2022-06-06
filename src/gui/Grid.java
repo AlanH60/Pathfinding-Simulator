@@ -2,6 +2,7 @@ package gui;
 import data.Vector2;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 
 import javafx.event.EventHandler;
 import javafx.scene.effect.ColorAdjust;
@@ -18,7 +19,7 @@ public class Grid
 	private static Image pathTile;
 	private static Image obstacleTile;
 	private static boolean imagesLoaded = false;
-	
+
 	enum SelectionType
 	{
 		START,
@@ -36,49 +37,52 @@ public class Grid
 	private SelectionType selectionType = SelectionType.NONE;
 	private boolean createObstacle = true;
 	
+	private  EventHandler<MouseEvent> handleHover = (e) -> {
+		int x = (int)e.getX() / Tile.WIDTH;
+		int y = (int)e.getY() / Tile.WIDTH;
+		if (x < 0 || x >= width || y < 0 || y >= height)
+			return;
+		
+		getTile(hover.x, hover.y).setHovered(false);
+		((ImageView)gp.getChildren().get(hover.y * width + hover.x)).setEffect(null);
+		hover.x = x;
+		hover.y = y;
+		getTile(hover.x, hover.y).setHovered(true);
+		if (getTileStatus(hover.x, hover.y) == Tile.Status.DEFAULT)
+			((ImageView)gp.getChildren().get(hover.y * width + hover.x)).setEffect(new ColorAdjust(0, 0, 0.5, 0));
+		update();
+	};
+	
+	private EventHandler<MouseEvent> handleClick = (e) -> {
+		switch (selectionType)
+		{
+		case START:
+			setStart(hover.x, hover.y);
+			break;
+		case END:
+			setEnd(hover.x, hover.y);
+			break;
+		case OBSTACLE:
+			if (e.getEventType() == MouseEvent.MOUSE_PRESSED)
+				createObstacle = getTileStatus(hover.x, hover.y) != Tile.Status.OBSTACLE;
+			if (createObstacle)
+				setObstacle(hover.x, hover.y);
+			else
+				deleteObstacle(hover.x, hover.y);
+			break;
+		case NONE:
+		default:
+			break;
+		}
+		update();
+	};
+	
 	public Grid(int width, int height) throws FileNotFoundException
 	{
 		this.width = width;
 		this.height = height;
 		gp = new GridPane();
-		EventHandler<MouseEvent> handleHover = (e) -> {
-			int x = (int)e.getX() / Tile.WIDTH;
-			int y = (int)e.getY() / Tile.WIDTH;
-			if (x < 0 || x >= width || y < 0 || y >= height)
-				return;
-			
-			getTile(hover.x, hover.y).setHovered(false);
-			((ImageView)gp.getChildren().get(hover.y * width + hover.x)).setEffect(null);
-			hover.x = x;
-			hover.y = y;
-			getTile(hover.x, hover.y).setHovered(true);
-			if (getTileStatus(hover.x, hover.y) == Tile.Status.DEFAULT)
-				((ImageView)gp.getChildren().get(hover.y * width + hover.x)).setEffect(new ColorAdjust(0, 0, 0.5, 0));
-			update();
-		};
-		EventHandler<MouseEvent> handleClick = (e) -> {
-			switch (selectionType)
-			{
-			case START:
-				setStart(hover.x, hover.y);
-				break;
-			case END:
-				setEnd(hover.x, hover.y);
-				break;
-			case OBSTACLE:
-				if (e.getEventType() == MouseEvent.MOUSE_PRESSED)
-					createObstacle = getTileStatus(hover.x, hover.y) != Tile.Status.OBSTACTLE;
-				if (createObstacle)
-					setObstacle(hover.x, hover.y);
-				else
-					deleteObstacle(hover.x, hover.y);
-				break;
-			case NONE:
-			default:
-				break;
-			}
-			update();
-		};
+
 		gp.setOnMouseMoved(handleHover);
 		gp.setOnMouseDragged((e) -> {
 			handleHover.handle(e);
@@ -124,47 +128,37 @@ public class Grid
 		}
 	}
 	
-	public void setWidth(int width)
+	private void setStart(int x, int y)
 	{
-		this.width = width;
-	}
-	
-	public void setHeight(int height)
-	{
-		this.height = height;
-	}
-	
-	public void setStart(int x, int y)
-	{
-		if (getTileStatus(x, y) == Tile.Status.END || getTileStatus(x, y) == Tile.Status.OBSTACTLE)
+		if (getTileStatus(x, y) == Tile.Status.END || getTileStatus(x, y) == Tile.Status.OBSTACLE)
 			return;
-		setStatus(start.x, start.y, Tile.Status.DEFAULT);
+		setTileStatus(start.x, start.y, Tile.Status.DEFAULT);
 		start.x = x;
 		start.y = y;
-		setStatus(start.x, start.y, Tile.Status.START);
+		setTileStatus(start.x, start.y, Tile.Status.START);
 	}
 	
-	public void setEnd(int x, int y)
+	private void setEnd(int x, int y)
 	{
-		if (getTileStatus(x, y) == Tile.Status.START || getTileStatus(x, y) == Tile.Status.OBSTACTLE)
+		if (getTileStatus(x, y) == Tile.Status.START || getTileStatus(x, y) == Tile.Status.OBSTACLE)
 			return;
-		setStatus(end.x, end.y, Tile.Status.DEFAULT);
+		setTileStatus(end.x, end.y, Tile.Status.DEFAULT);
 		end.x = x;
 		end.y = y;
-		setStatus(end.x, end.y, Tile.Status.END);
+		setTileStatus(end.x, end.y, Tile.Status.END);
 	}
 	
-	public void setObstacle(int x, int y)
+	private void setObstacle(int x, int y)
 	{
 		if (getTileStatus(x, y) == Tile.Status.START || getTileStatus(x, y) == Tile.Status.END)
 			return;
-		setStatus(x, y, Tile.Status.OBSTACTLE);
+		setTileStatus(x, y, Tile.Status.OBSTACLE);
 	}
 	
-	public void deleteObstacle(int x, int y)
+	private void deleteObstacle(int x, int y)
 	{
-		if (getTileStatus(x, y) == Tile.Status.OBSTACTLE)
-			setStatus(x, y, Tile.Status.DEFAULT);
+		if (getTileStatus(x, y) == Tile.Status.OBSTACLE)
+			setTileStatus(x, y, Tile.Status.DEFAULT);
 	}
 	
 	public int getGridWidth()
@@ -187,13 +181,13 @@ public class Grid
 		return end;
 	}
 	
-	public Tile getTile(int x, int y)
+	private Tile getTile(int x, int y)
 	{
 		assert(!(x < 0 || x >= width || y < 0 || y >= height));
 		return tiles[y * width + x];
 	}
 	
-	public Image getTileImage(int x, int y)
+	private Image getTileImage(int x, int y)
 	{
 		switch (getTile(x, y).getStatus())
 		{
@@ -203,7 +197,7 @@ public class Grid
 				return endTile;
 			case PATH:
 				return pathTile;
-			case OBSTACTLE:
+			case OBSTACLE:
 				return obstacleTile;
 			case DEFAULT:
 			default:
@@ -225,12 +219,12 @@ public class Grid
 		}
 	}
 	
-	public Tile.Status getTileStatus(int x, int y)
+	private Tile.Status getTileStatus(int x, int y)
 	{
 		return getTile(x, y).getStatus();
 	}
 	
-	private void setStatus(int x, int y, Tile.Status status)
+	private void setTileStatus(int x, int y, Tile.Status status)
 	{
 		getTile(x, y).setStatus(status);
 	}
@@ -250,4 +244,55 @@ public class Grid
 		return selectionType;
 	}
 	
+	public boolean hasObstacle(int x, int y)
+	{
+		return getTileStatus(x, y) == Tile.Status.OBSTACLE;
+	}
+	
+	public boolean viableNeighbor(Vector2<Integer> origin, Vector2<Integer> neighbor)
+	{
+		if (neighbor.x < 0 || neighbor.x >= width || neighbor.y < 0 || neighbor.y >= height)
+			return false;
+		if (hasObstacle(neighbor.x, neighbor.y) || origin.equals(neighbor))
+			return false;
+		int xDiff = Math.abs(origin.x - neighbor.x);
+		int yDiff = Math.abs(origin.y - neighbor.y);
+		if (xDiff <= 1 && yDiff <= 1)
+		{
+			if (xDiff == 1 && yDiff == 1 && hasObstacle(neighbor.x, origin.y) && hasObstacle(origin.x, neighbor.y))
+				return false;
+			return true;
+		}
+		return false;
+	}
+	
+	public void clearPath()
+	{
+		for (Tile t : tiles)
+			if (t.getStatus() == Tile.Status.PATH)
+				t.setStatus(Tile.Status.DEFAULT);
+		update();
+	}
+	
+	public void clearObstacles()
+	{
+		for (Tile t : tiles)
+			if (t.getStatus() == Tile.Status.OBSTACLE)
+				t.setStatus(Tile.Status.DEFAULT);
+		update();
+	}
+	
+	public void setPath(ArrayList<Vector2<Integer>> path)
+	{
+		clearPath();
+		if (path == null)
+			return;
+		for (Vector2<Integer> coord : path)
+		{
+			if (getTileStatus(coord.x, coord.y) == Tile.Status.END)
+				continue;
+			setTileStatus(coord.x, coord.y, Tile.Status.PATH);
+		}
+		update();
+	}
 }

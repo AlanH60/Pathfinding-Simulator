@@ -1,6 +1,8 @@
 package gui;
 
 import java.util.HashMap;
+
+import algorithms.Dijkstra;
 import javafx.fxml.FXML;
 import javafx.scene.effect.ColorAdjust;
 import javafx.scene.image.ImageView;
@@ -64,6 +66,26 @@ public class GridController
 		ColorAdjust ca = new ColorAdjust();
 		ca.setBrightness((e.getEventType() == MouseEvent.MOUSE_ENTERED) ? 0.5 : 0.0);
 		icon.setEffect(ca);
+	}
+	
+	@FXML
+	private void start(MouseEvent e)
+	{
+		long start = System.currentTimeMillis();
+		grid.setPath(Dijkstra.dijkstra(grid));
+		System.out.println("Time Elapsed: " + (System.currentTimeMillis() - start) + " ms");
+	}
+	
+	@FXML
+	private void clearPath(MouseEvent e)
+	{
+		grid.clearPath();
+	}
+	
+	@FXML
+	private void clearObstacles(MouseEvent e)
+	{
+		grid.clearObstacles();
 	}
 
 }

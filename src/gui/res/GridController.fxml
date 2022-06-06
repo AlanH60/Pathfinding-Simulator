@@ -42,8 +42,11 @@
 				</image>
 			</ImageView>
 		</VBox>
-
+		
 		
 
 	</HBox>
+	<Button text="Start" onMouseClicked="#start"/>
+	<Button text="Clear Path" onMouseClicked="#clearPath"/>
+	<Button text="Clear Obstacles" onMouseClicked="#clearObstacles"/>
 </VBox>
