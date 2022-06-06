@@ -2,7 +2,7 @@ package gui;
 
 public class Tile 
 {	
-	public static final int WIDTH = 30;
+	public static final int WIDTH = 25;
 	enum Status
 	{
 		DEFAULT,

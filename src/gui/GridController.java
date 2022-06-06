@@ -2,8 +2,10 @@ package gui;
 
 import java.util.HashMap;
 
+import algorithms.AStar;
 import algorithms.Dijkstra;
 import javafx.fxml.FXML;
+import javafx.scene.control.ComboBox;
 import javafx.scene.effect.ColorAdjust;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -11,10 +13,14 @@ import javafx.scene.layout.VBox;
 
 public class GridController 
 {
+	private static final int DIJKSTRA = 0;
+	private static final int ASTAR = 1;
+	
 	@FXML private VBox controller;
 	@FXML private ImageView startIcon;
 	@FXML private ImageView endIcon;
 	@FXML private ImageView obstacleIcon;
+	@FXML private ComboBox algorithmSelectionBox;
 	private ImageView selectedIcon;
 	private HashMap<ImageView, Grid.SelectionType> iconToType;
 	private Grid grid;
@@ -72,7 +78,20 @@ public class GridController
 	private void start(MouseEvent e)
 	{
 		long start = System.currentTimeMillis();
-		grid.setPath(Dijkstra.dijkstra(grid));
+		int selectedAlgorithm = algorithmSelectionBox.getSelectionModel().getSelectedIndex();
+		
+		switch (selectedAlgorithm)
+		{
+		case DIJKSTRA:
+			System.out.print("Dijkstra: ");
+			grid.setPath(Dijkstra.dijkstra(grid));
+			break;
+		case ASTAR:
+			System.out.print("A*: ");
+			grid.setPath(AStar.aStar(grid));
+			break;
+		}
+		
 		System.out.println("Time Elapsed: " + (System.currentTimeMillis() - start) + " ms");
 	}
 	

@@ -20,7 +20,7 @@ public class Dijkstra
 
 		double[][] distances = new double[width][height];
 		HashMap<Vector2<Integer>, Vector2<Integer>> childToParent = new HashMap<Vector2<Integer>, Vector2<Integer>>();
-		PriorityQueue<Vector2<Integer>> queue = new PriorityQueue<Vector2<Integer>>();
+		PriorityQueue<Vector2<Integer>> queue = new PriorityQueue<Vector2<Integer>>(width * height);
 		queue.add(start, 0);
 		distances[start.x][start.y] = 0;  
 		childToParent.put(start, null);
@@ -29,7 +29,7 @@ public class Dijkstra
 			for (int y = 0; y < height; y ++)
 			{
 				if (grid.hasObstacle(x, y) || start.equals(x, y))
-					continue;
+					continue; 
 				int xDiff = Math.abs(start.x - x);
 				int yDiff = Math.abs(start.y - y);
 				if (grid.viableNeighbor(start, new Vector2<Integer>(x, y)))

@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.net.*?>
+<?import java.lang.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.image.Image?>
+<?import javafx.collections.*?>
 
 <VBox fx:id="controller" xmlns:fx="http://javafx.com/fxml" prefWidth="300">	
 
@@ -38,7 +39,7 @@
 			</HBox>
 			<ImageView fx:id="obstacleIcon" onMouseClicked="#handleIconClick" onMouseEntered="#handleIconHover" onMouseExited="#handleIconHover" fitWidth="50" fitHeight="50">
 				<image>
-					<Image url="@ObstacleTile.png"/>
+					<Image url="@ObstacleTile.png" />
 				</image>
 			</ImageView>
 		</VBox>
@@ -46,6 +47,16 @@
 		
 
 	</HBox>
+	
+	<ComboBox fx:id="algorithmSelectionBox">
+		<items>
+			<FXCollections fx:factory="observableArrayList">
+				<String fx:value="Dijkstra's Algorithm" />
+				<String fx:value="A* Algorithm" />
+			</FXCollections>
+		</items>
+	</ComboBox>
+	
 	<Button text="Start" onMouseClicked="#start"/>
 	<Button text="Clear Path" onMouseClicked="#clearPath"/>
 	<Button text="Clear Obstacles" onMouseClicked="#clearObstacles"/>

@@ -17,7 +17,7 @@ public class App extends Application
 		
 		GridPane gridPane = new GridPane();
 
-		Grid grid = new Grid(20, 20);
+		Grid grid = new Grid(600 / Tile.WIDTH, 600 / Tile.WIDTH);
 		
 		GridController gc = new GridController(grid);
 
