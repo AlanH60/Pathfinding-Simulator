@@ -1,8 +1,9 @@
 package gui;
 import javafx.application.*;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.SplitPane;
-import javafx.scene.layout.Background;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 public class App extends Application
@@ -14,22 +15,22 @@ public class App extends Application
 		stage.setTitle("Pathfinding Simulator");
 		stage.setScene(new Scene(root, 900, 600));
 		
-		SplitPane splitPane = new SplitPane();
+		GridPane gridPane = new GridPane();
 
+		Grid grid = new Grid(20, 20);
 		
+		GridController gc = new GridController(grid);
+
+		FXMLLoader loader = new FXMLLoader(getClass().getResource("res/GridController.fxml"));
+		loader.setController(gc);
+		loader.load();
 		
-		Grid grid = new Grid(60, 60);
-		
-		splitPane.getItems().addAll(grid, new Pane());
-		splitPane.setDividerPositions(0.5f);
-		root.getChildren().add(splitPane);
+		gridPane.add(grid.getGridPane(), 0, 0);
+		gridPane.add(gc.get(), 1, 0);
+
+		root.getChildren().add(gridPane);
 		stage.show();
 		
-	}
-	
-	public static void main(String[] args)
-	{
-		launch(args);
 	}
 
 }

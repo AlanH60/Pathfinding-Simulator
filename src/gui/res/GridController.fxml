@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+
+<VBox fx:id="controller" xmlns:fx="http://javafx.com/fxml" prefWidth="300">	
+
+	<HBox spacing="50" alignment="center">
+		<padding><Insets top="25" right="25" left="25"/></padding>
+		<VBox>
+			<HBox alignment="CENTER">
+				<Label text="Start" style="fx-font:bold 30px Georgia;" />
+			</HBox>
+			<ImageView fx:id="startIcon" onMouseClicked="#handleIconClick" onMouseEntered="#handleIconHover" onMouseExited="#handleIconHover" fitWidth="50" fitHeight="50">
+				<image>
+					<Image url="@StartTile.png"/>
+				</image>
+			</ImageView>
+		</VBox>
+		<VBox>
+			<HBox alignment="CENTER">
+				<Label text="End" style="fx-font:bold 30px Georgia;" />
+			</HBox>
+			<ImageView fx:id="endIcon" onMouseClicked="#handleIconClick" onMouseEntered="#handleIconHover" onMouseExited="#handleIconHover" fitWidth="50" fitHeight="50">
+				<image>
+					<Image url="@EndTile.png"/>
+				</image>
+			</ImageView>
+		</VBox>
+		<VBox>
+			<HBox alignment="CENTER">
+				<Label text="Obstacle" style="fx-font:bold 30px Georgia;" />
+			</HBox>
+			<ImageView fx:id="obstacleIcon" onMouseClicked="#handleIconClick" onMouseEntered="#handleIconHover" onMouseExited="#handleIconHover" fitWidth="50" fitHeight="50">
+				<image>
+					<Image url="@ObstacleTile.png"/>
+				</image>
+			</ImageView>
+		</VBox>
+
+		
+
+	</HBox>
+</VBox>
