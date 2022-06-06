@@ -9,35 +9,51 @@
 <?import javafx.scene.image.Image?>
 <?import javafx.collections.*?>
 
-<VBox fx:id="controller" xmlns:fx="http://javafx.com/fxml" prefWidth="300">	
+<VBox fx:id="controller" xmlns:fx="http://javafx.com/fxml" prefWidth="300" alignment="center">	
 
-	<HBox spacing="50" alignment="center">
-		<padding><Insets top="25" right="25" left="25"/></padding>
-		<VBox>
-			<HBox alignment="CENTER">
-				<Label text="Start" style="fx-font:bold 30px Georgia;" />
+	<VBox alignment="center">
+		<padding><Insets top="25" bottom="50" right="0" left="0" /></padding>
+		<Text style="-fx-font: bold 20px Georgia;">Select a Pathfinding  </Text>
+		<Text style="-fx-font: bold 20px Georgia;">Algorithm:</Text>
+		<ComboBox fx:id="algorithmSelectionBox">
+			<items>
+				<FXCollections fx:factory="observableArrayList">
+					<String fx:value="Dijkstra" />
+					<String fx:value="A*" />
+				</FXCollections>
+			</items>
+		</ComboBox>
+	</VBox>
+	
+	<Label text="Edit Grid:" style="-fx-font:bold 20px Georgia" />
+	
+	<HBox spacing="25" alignment="center">
+		
+		<VBox alignment="center">
+			<HBox alignment="center">
+				<Label text="Start" style="-fx-font:bold 12px Georgia;" />
 			</HBox>
-			<ImageView fx:id="startIcon" onMouseClicked="#handleIconClick" onMouseEntered="#handleIconHover" onMouseExited="#handleIconHover" fitWidth="50" fitHeight="50">
+			<ImageView fx:id="startIcon" onMouseClicked="#handleIconClick" onMouseEntered="#handleIconHover" onMouseExited="#handleIconHover" fitWidth="35" fitHeight="35">
 				<image>
 					<Image url="@StartTile.png"/>
 				</image>
 			</ImageView>
 		</VBox>
-		<VBox>
-			<HBox alignment="CENTER">
-				<Label text="End" style="fx-font:bold 30px Georgia;" />
+		<VBox alignment="center">
+			<HBox alignment="center">
+				<Label text="End" style="-fx-font:bold 12px Georgia;" />
 			</HBox>
-			<ImageView fx:id="endIcon" onMouseClicked="#handleIconClick" onMouseEntered="#handleIconHover" onMouseExited="#handleIconHover" fitWidth="50" fitHeight="50">
+			<ImageView fx:id="endIcon" onMouseClicked="#handleIconClick" onMouseEntered="#handleIconHover" onMouseExited="#handleIconHover" fitWidth="35" fitHeight="35">
 				<image>
 					<Image url="@EndTile.png"/>
 				</image>
 			</ImageView>
 		</VBox>
-		<VBox>
-			<HBox alignment="CENTER">
-				<Label text="Obstacle" style="fx-font:bold 30px Georgia;" />
+		<VBox alignment="center">
+			<HBox alignment="center">
+				<Label text="Obstacle" style="-fx-font:bold 12px Georgia;"/>
 			</HBox>
-			<ImageView fx:id="obstacleIcon" onMouseClicked="#handleIconClick" onMouseEntered="#handleIconHover" onMouseExited="#handleIconHover" fitWidth="50" fitHeight="50">
+			<ImageView fx:id="obstacleIcon" onMouseClicked="#handleIconClick" onMouseEntered="#handleIconHover" onMouseExited="#handleIconHover" fitWidth="35" fitHeight="35">
 				<image>
 					<Image url="@ObstacleTile.png" />
 				</image>
@@ -47,17 +63,8 @@
 		
 
 	</HBox>
-	
-	<ComboBox fx:id="algorithmSelectionBox">
-		<items>
-			<FXCollections fx:factory="observableArrayList">
-				<String fx:value="Dijkstra's Algorithm" />
-				<String fx:value="A* Algorithm" />
-			</FXCollections>
-		</items>
-	</ComboBox>
-	
-	<Button text="Start" onMouseClicked="#start"/>
-	<Button text="Clear Path" onMouseClicked="#clearPath"/>
-	<Button text="Clear Obstacles" onMouseClicked="#clearObstacles"/>
+	<VBox prefHeight="250"/>
+	<Button text="Start" onMouseClicked="#start" prefWidth="300" style="-fx-font-size:18px" />
+	<Button text="Clear Path" onMouseClicked="#clearPath" prefWidth="300" style="-fx-font-size:18px" />
+	<Button text="Clear Obstacles" onMouseClicked="#clearObstacles" prefWidth="300" style="-fx-font-size:18px" />
 </VBox>
