@@ -9,7 +9,8 @@ public class Tile
 		START,
 		END,
 		OBSTACLE,
-		PATH
+		PATH,
+		VISITED
 	}
 	
 	private Status status = Status.DEFAULT;

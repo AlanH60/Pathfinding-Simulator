@@ -6,6 +6,7 @@ import java.util.HashMap;
 import data.PriorityQueue;
 import data.Vector2;
 import gui.Grid;
+import javafx.application.Platform;
 
 public class AStar 
 {
@@ -32,30 +33,38 @@ public class AStar
 		while (!queue.isEmpty())
 		{
 			Vector2<Integer> curr = queue.next();
+			
 			visited.put(curr, true);
 			if (curr.equals(end))
 				break;
-			
-			for (int x = -1; x <= 1; x ++)
-				for (int y = -1; y <= 1; y ++)
+			Platform.runLater(()->{
+				grid.update();
+				grid.setVisited(curr);
+			});
+			try
+			{
+				Thread.sleep(10);
+			}
+			catch(Exception e) {}
+			ArrayList<Vector2<Integer>> neighbors = grid.getNeighbors(curr);
+			for (Vector2<Integer> neighbor : neighbors)
+			{
+				if (!visited.containsKey(neighbor))
 				{
-					Vector2<Integer> neighbor = new Vector2<Integer>(curr.x + x, curr.y + y);
-					if (grid.viableNeighbor(curr, neighbor) && !visited.containsKey(neighbor))
+					if (!hScores.containsKey(neighbor))
+						hScores.put(neighbor, Util.dist(neighbor, end));
+					
+					double newGScore = Util.dist(neighbor, curr) + gScores.get(curr);
+					
+					if (!gScores.containsKey(neighbor) || newGScore < gScores.get(neighbor))
 					{
-						if (!hScores.containsKey(neighbor))
-							hScores.put(neighbor, Util.dist(neighbor, end));
-						
-						double newGScore = Util.dist(neighbor, curr) + gScores.get(curr);
-						
-						if (!gScores.containsKey(neighbor) || newGScore < gScores.get(neighbor))
-						{
-							gScores.put(neighbor, newGScore);
-							childToParent.put(neighbor, curr);
-							queue.add(neighbor, hScores.get(neighbor) + gScores.get(neighbor));
-						}
-						
+						gScores.put(neighbor, newGScore);
+						childToParent.put(neighbor, curr);
+						queue.add(neighbor, hScores.get(neighbor) + gScores.get(neighbor));
 					}
+					
 				}
+			}
 		}
 		
 		if (!childToParent.containsKey(end))

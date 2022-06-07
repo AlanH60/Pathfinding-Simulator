@@ -8,10 +8,9 @@ import data.Vector2;
 import gui.Grid;
 import javafx.application.Platform;
 
-public class Dijkstra 
-{	
-	
-	public static ArrayList<Vector2<Integer>> dijkstra(Grid grid)
+public class BreadthFirstSearch 
+{
+	public static ArrayList<Vector2<Integer>> BFS(Grid grid)
 	{
 		int width = grid.getGridWidth();
 		int height = grid.getGridHeight();
@@ -19,28 +18,16 @@ public class Dijkstra
 		Vector2<Integer> end = grid.getEnd();
 		
 
-		double[][] distances = new double[width][height];
 		HashMap<Vector2<Integer>, Vector2<Integer>> childToParent = new HashMap<Vector2<Integer>, Vector2<Integer>>(width * height);
-		PriorityQueue<Vector2<Integer>> queue = new PriorityQueue<Vector2<Integer>>(width * height);
-		queue.add(start, 0);
-		distances[start.x][start.y] = 0;  
+		ArrayList<Vector2<Integer>> next = new ArrayList<Vector2<Integer>>(width * height);
 		childToParent.put(start, null);
-		
-		for (int x = 0; x < width; x ++)
-			for (int y = 0; y < height; y ++)
-			{
-				if (grid.hasObstacle(x, y) || start.equals(x, y))
-					continue; 
-				distances[x][y] = Double.MAX_VALUE;
-			}
-		
-		while (!queue.isEmpty())
+		next.add(start);
+		while (!next.isEmpty())
 		{
-			Vector2<Integer> curr = queue.next();
+			Vector2<Integer> curr = next.get(0);
 			
 			if (curr.equals(end))
 				break;
-			
 			Platform.runLater(()->{
 				grid.update();
 				grid.setVisited(curr);
@@ -53,16 +40,17 @@ public class Dijkstra
 			ArrayList<Vector2<Integer>> neighbors = grid.getNeighbors(curr);
 			for (Vector2<Integer> neighbor : neighbors)
 			{
-				double newDistance = distances[curr.x][curr.y] + Util.dist(neighbor, curr);
-				if (distances[neighbor.x][neighbor.y] > newDistance)
+				if (neighbor.x != curr.x && neighbor.y != curr.y)
+					continue;
+				if (!childToParent.containsKey(neighbor))
 				{
-					distances[neighbor.x][neighbor.y] = newDistance; 
+					next.add(neighbor);
 					childToParent.put(neighbor, curr);
-					queue.add(neighbor, newDistance);
 				}
 			}
+			next.remove(0);
 		}
-		if (distances[end.x][end.y] == Double.MAX_VALUE)
+		if (!childToParent.containsKey(end))
 			return null;
 		ArrayList<Vector2<Integer>> path = new ArrayList<Vector2<Integer>>();
 		path.add(end);

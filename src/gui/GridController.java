@@ -3,6 +3,9 @@ package gui;
 import java.util.HashMap;
 
 import algorithms.AStar;
+import algorithms.AStarJPS;
+import algorithms.BreadthFirstSearch;
+import algorithms.DepthFirstSearch;
 import algorithms.Dijkstra;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
@@ -15,6 +18,8 @@ public class GridController
 {
 	private static final int DIJKSTRA = 0;
 	private static final int ASTAR = 1;
+	private static final int BFS = 2;
+	private static final int DFS = 3;
 	
 	@FXML private VBox controller;
 	@FXML private ImageView startIcon;
@@ -24,6 +29,8 @@ public class GridController
 	private ImageView selectedIcon;
 	private HashMap<ImageView, Grid.SelectionType> iconToType;
 	private Grid grid;
+	private boolean running = false;
+	Thread t;
 	
 	public GridController(Grid grid)
 	{
@@ -44,6 +51,8 @@ public class GridController
 	@FXML
 	private void handleIconClick(MouseEvent e)
 	{
+		if (running)
+			return;
 		if (selectedIcon != null)
 			selectedIcon.setEffect(null);
 		
@@ -66,6 +75,8 @@ public class GridController
 	@FXML 
 	private void handleIconHover(MouseEvent e)
 	{
+		if (running)
+			return;
 		ImageView icon = (ImageView)e.getSource();
 		if (icon == selectedIcon)
 			return;
@@ -77,6 +88,14 @@ public class GridController
 	@FXML
 	private void start(MouseEvent e)
 	{
+		running = true;
+		endIcon.setEffect(null);
+		startIcon.setEffect(null);
+		obstacleIcon.setEffect(null);
+		selectedIcon = null;
+		grid.setSelectionType(Grid.SelectionType.NONE);
+		grid.clearVisited();
+		grid.clearPath();
 		long start = System.currentTimeMillis();
 		int selectedAlgorithm = algorithmSelectionBox.getSelectionModel().getSelectedIndex();
 		
@@ -84,11 +103,44 @@ public class GridController
 		{
 		case DIJKSTRA:
 			System.out.print("Dijkstra: ");
-			grid.setPath(Dijkstra.dijkstra(grid));
+			t = new Thread(
+			() ->
+			{
+				grid.setPath(Dijkstra.dijkstra(grid));
+				running = false;
+			});
+			t.start();
 			break;
 		case ASTAR:
 			System.out.print("A*: ");
-			grid.setPath(AStar.aStar(grid));
+			t = new Thread(
+			() ->
+			{
+				grid.setPath(AStar.aStar(grid));
+				running = false;
+			});
+			t.start();
+			break;
+		case BFS:
+			System.out.print("BFS: ");
+			t = new Thread(
+			() ->
+			{
+				grid.setPath(BreadthFirstSearch.BFS(grid));
+				running = false;
+			});
+			t.start();
+			break;
+		case DFS:
+			System.out.print("DFS: ");
+			t = new Thread(
+			() ->
+			{
+				grid.setPath(DepthFirstSearch.DFS(grid));
+				running = false;
+			});
+			t.start();
+			
 			break;
 		}
 		
@@ -96,15 +148,15 @@ public class GridController
 	}
 	
 	@FXML
-	private void clearPath(MouseEvent e)
-	{
-		grid.clearPath();
-	}
-	
-	@FXML
 	private void clearObstacles(MouseEvent e)
 	{
 		grid.clearObstacles();
+	}
+	
+	@FXML
+	private void clear(MouseEvent e)
+	{
+		grid.clear();
 	}
 
 }

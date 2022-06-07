@@ -18,6 +18,7 @@ public class Grid
 	private static Image endTile;
 	private static Image pathTile;
 	private static Image obstacleTile;
+	private static Image visitedTile;
 	private static boolean imagesLoaded = false;
 
 	enum SelectionType
@@ -36,6 +37,7 @@ public class Grid
 	private GridPane gp;
 	private SelectionType selectionType = SelectionType.NONE;
 	private boolean createObstacle = true;
+	private boolean showVisited = false;
 	
 	private  EventHandler<MouseEvent> handleHover = (e) -> {
 		int x = (int)e.getX() / Tile.WIDTH;
@@ -48,12 +50,17 @@ public class Grid
 		hover.x = x;
 		hover.y = y;
 		getTile(hover.x, hover.y).setHovered(true);
-		if (getTileStatus(hover.x, hover.y) == Tile.Status.DEFAULT)
+		if (getTileStatus(hover.x, hover.y) == Tile.Status.DEFAULT || getTileStatus(hover.x, hover.y) == Tile.Status.VISITED )
 			((ImageView)gp.getChildren().get(hover.y * width + hover.x)).setEffect(new ColorAdjust(0, 0, 0.5, 0));
 		update();
 	};
 	
 	private EventHandler<MouseEvent> handleClick = (e) -> {
+		if (selectionType != SelectionType.NONE && showVisited)
+		{
+			clearVisited();
+			showVisited = false;
+		}
 		switch (selectionType)
 		{
 		case START:
@@ -98,6 +105,7 @@ public class Grid
 			endTile = new Image(new FileInputStream("src/gui/res/EndTile.png"));
 			pathTile = new Image(new FileInputStream("src/gui/res/PathTile.png"));
 			obstacleTile = new Image(new FileInputStream("src/gui/res/ObstacleTile.png"));
+			visitedTile = new Image(new FileInputStream("src/gui/res/VisitedTile.png"));
 			imagesLoaded = true;
 		}
 		
@@ -199,6 +207,8 @@ public class Grid
 				return pathTile;
 			case OBSTACLE:
 				return obstacleTile;
+			case VISITED:
+				return visitedTile;
 			case DEFAULT:
 			default:
 				if (getTile(x,y).isHovered())
@@ -246,30 +256,46 @@ public class Grid
 	
 	public boolean hasObstacle(int x, int y)
 	{
+		if (!validTile(x, y))
+			return true;
 		return getTileStatus(x, y) == Tile.Status.OBSTACLE;
 	}
 	
-	public boolean viableNeighbor(Vector2<Integer> origin, Vector2<Integer> neighbor)
+	public boolean hasObstacle(Vector2<Integer> tile)
 	{
-		if (neighbor.x < 0 || neighbor.x >= width || neighbor.y < 0 || neighbor.y >= height)
-			return false;
-		if (hasObstacle(neighbor.x, neighbor.y) || origin.equals(neighbor))
-			return false;
-		int xDiff = Math.abs(origin.x - neighbor.x);
-		int yDiff = Math.abs(origin.y - neighbor.y);
-		if (xDiff <= 1 && yDiff <= 1)
-		{
-			if (xDiff == 1 && yDiff == 1 && hasObstacle(neighbor.x, origin.y) && hasObstacle(origin.x, neighbor.y))
-				return false;
-			return true;
-		}
-		return false;
+		return hasObstacle(tile.x, tile.y);
+	}
+	
+	public ArrayList<Vector2<Integer>> getNeighbors(Vector2<Integer> tile)
+	{
+		ArrayList<Vector2<Integer>> neighbors = new ArrayList<Vector2<Integer>>(8);
+		for (int x = -1; x <= 1; x ++)
+			for (int y = -1; y <= 1; y ++)
+			{
+				Vector2<Integer> neighbor = new Vector2<Integer>(tile.x + x, tile.y + y);
+				if (neighbor.x < 0 || neighbor.x >= width || neighbor.y < 0 || neighbor.y >= height)
+					continue;
+				if (hasObstacle(neighbor.x, neighbor.y) || tile.equals(neighbor))
+					continue;
+				if (x == 1 && y == 1 && hasObstacle(neighbor.x, tile.y) && hasObstacle(tile.x, neighbor.y))
+					continue;
+				neighbors.add(neighbor);
+			}
+		return neighbors;
 	}
 	
 	public void clearPath()
 	{
 		for (Tile t : tiles)
 			if (t.getStatus() == Tile.Status.PATH)
+				t.setStatus(Tile.Status.DEFAULT);
+		update();
+	}
+	
+	public void clearVisited()
+	{
+		for (Tile t : tiles)
+			if (t.getStatus() == Tile.Status.VISITED)
 				t.setStatus(Tile.Status.DEFAULT);
 		update();
 	}
@@ -282,6 +308,23 @@ public class Grid
 		update();
 	}
 	
+	public void clear()
+	{
+		for (Tile t : tiles)
+			if (t.getStatus() != Tile.Status.START && t.getStatus() != Tile.Status.END)
+				t.setStatus(Tile.Status.DEFAULT);
+		update();
+	}
+	
+	public void setVisited(Vector2<Integer> visited)
+	{
+		showVisited = true;
+		if (getTileStatus(visited.x, visited.y) != Tile.Status.DEFAULT)
+			return;
+		setTileStatus(visited.x, visited.y, Tile.Status.VISITED);
+		update();
+	}
+	
 	public void setPath(ArrayList<Vector2<Integer>> path)
 	{
 		clearPath();
@@ -289,10 +332,15 @@ public class Grid
 			return;
 		for (Vector2<Integer> coord : path)
 		{
-			if (getTileStatus(coord.x, coord.y) == Tile.Status.END)
+			if (getTileStatus(coord.x, coord.y) != Tile.Status.DEFAULT && getTileStatus(coord.x, coord.y) != Tile.Status.VISITED )
 				continue;
 			setTileStatus(coord.x, coord.y, Tile.Status.PATH);
 		}
 		update();
+	}
+	
+	public boolean validTile(int x, int y)
+	{
+		return x >= 0 && x < width && y >= 0 && y < height;
 	}
 }
