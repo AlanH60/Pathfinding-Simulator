@@ -13,62 +13,70 @@ public class Dijkstra
 	
 	public static ArrayList<Vector2<Integer>> dijkstra(Grid grid)
 	{
-		int width = grid.getGridWidth();
-		int height = grid.getGridHeight();
-		Vector2<Integer> start = grid.getStart();
-		Vector2<Integer> end = grid.getEnd();
-		
-
-		double[][] distances = new double[width][height];
-		HashMap<Vector2<Integer>, Vector2<Integer>> childToParent = new HashMap<Vector2<Integer>, Vector2<Integer>>(width * height);
-		PriorityQueue<Vector2<Integer>> queue = new PriorityQueue<Vector2<Integer>>(width * height);
-		queue.add(start, 0);
-		distances[start.x][start.y] = 0;  
-		childToParent.put(start, null);
-		
-		for (int x = 0; x < width; x ++)
-			for (int y = 0; y < height; y ++)
-			{
-				if (grid.hasObstacle(x, y) || start.equals(x, y))
-					continue; 
-				distances[x][y] = Double.MAX_VALUE;
-			}
-		
-		while (!queue.isEmpty())
+		try 
 		{
-			Vector2<Integer> curr = queue.next();
+			int width = grid.getGridWidth();
+			int height = grid.getGridHeight();
+			Vector2<Integer> start = grid.getStart();
+			Vector2<Integer> end = grid.getEnd();
 			
-			if (curr.equals(end))
-				break;
+
+			double[][] distances = new double[width][height];
+			HashMap<Vector2<Integer>, Vector2<Integer>> childToParent = new HashMap<Vector2<Integer>, Vector2<Integer>>(width * height);
+			PriorityQueue<Vector2<Integer>> queue = new PriorityQueue<Vector2<Integer>>(width * height);
+			queue.add(start, 0);
+			distances[start.x][start.y] = 0;  
+			childToParent.put(start, null);
 			
-			Platform.runLater(()->{
-				grid.update();
-				grid.setVisited(curr);
-			});
-			try
-			{
-				Thread.sleep(10);
-			}
-			catch(Exception e) {}
-			ArrayList<Vector2<Integer>> neighbors = grid.getNeighbors(curr);
-			for (Vector2<Integer> neighbor : neighbors)
-			{
-				double newDistance = distances[curr.x][curr.y] + Util.dist(neighbor, curr);
-				if (distances[neighbor.x][neighbor.y] > newDistance)
+			for (int x = 0; x < width; x ++)
+				for (int y = 0; y < height; y ++)
 				{
-					distances[neighbor.x][neighbor.y] = newDistance; 
-					childToParent.put(neighbor, curr);
-					queue.add(neighbor, newDistance);
+					if (grid.hasObstacle(x, y) || start.equals(x, y))
+						continue; 
+					distances[x][y] = Double.MAX_VALUE;
+				}
+			
+			while (!queue.isEmpty())
+			{
+				Vector2<Integer> curr = queue.next();
+				
+				if (curr.equals(end))
+					break;
+				
+				Platform.runLater(()->{
+					grid.setVisitedTile(curr);
+				});
+				Thread.sleep(10);
+
+				ArrayList<Vector2<Integer>> neighbors = grid.getNeighbors(curr);
+				for (Vector2<Integer> neighbor : neighbors)
+				{
+					double newDistance = distances[curr.x][curr.y] + Util.dist(neighbor, curr);
+					if (distances[neighbor.x][neighbor.y] > newDistance)
+					{
+						distances[neighbor.x][neighbor.y] = newDistance; 
+						childToParent.put(neighbor, curr);
+						queue.add(neighbor, newDistance);
+					}
 				}
 			}
+			
+			ArrayList<Vector2<Integer>> path = new ArrayList<Vector2<Integer>>();
+			if (!childToParent.containsKey(end))
+				return path;
+			
+			path.add(end);
+			while (!childToParent.get(path.get(0)).equals(start))
+				path.add(0, childToParent.get(path.get(0)));
+			return path;
 		}
-		if (distances[end.x][end.y] == Double.MAX_VALUE)
+		catch (InterruptedException e)
+		{
+			Platform.runLater(()->{
+				grid.clearVisited();
+			});
 			return null;
-		ArrayList<Vector2<Integer>> path = new ArrayList<Vector2<Integer>>();
-		path.add(end);
-		while (!childToParent.get(path.get(0)).equals(start))
-			path.add(0, childToParent.get(path.get(0)));
-		return path;
-		
+		}
+
 	}
 }

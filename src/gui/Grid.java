@@ -13,6 +13,13 @@ import javafx.scene.layout.GridPane;
 
 public class Grid
 {
+	enum SelectionType
+	{
+		START,
+		END,
+		OBSTACLE,
+		NONE
+	}
 	private static Image defaultTile;
 	private static Image startTile;
 	private static Image endTile;
@@ -21,14 +28,7 @@ public class Grid
 	private static Image visitedTile;
 	private static boolean imagesLoaded = false;
 
-	enum SelectionType
-	{
-		START,
-		END,
-		OBSTACLE,
-		NONE
-	}
-	
+
 	private int width, height;
 	private Vector2<Integer> hover = new Vector2<Integer>(0, 0);
 	private Vector2<Integer> start = new Vector2<Integer>(0, 0);
@@ -38,8 +38,11 @@ public class Grid
 	private SelectionType selectionType = SelectionType.NONE;
 	private boolean createObstacle = true;
 	private boolean showVisited = false;
-	
+	private boolean locked = false;
+
 	private  EventHandler<MouseEvent> handleHover = (e) -> {
+		if (locked)
+			return;
 		int x = (int)e.getX() / Tile.WIDTH;
 		int y = (int)e.getY() / Tile.WIDTH;
 		if (x < 0 || x >= width || y < 0 || y >= height)
@@ -50,36 +53,39 @@ public class Grid
 		hover.x = x;
 		hover.y = y;
 		getTile(hover.x, hover.y).setHovered(true);
-		if (getTileStatus(hover.x, hover.y) == Tile.Status.DEFAULT || getTileStatus(hover.x, hover.y) == Tile.Status.VISITED )
+		if (getTileStatus(hover.x, hover.y) != Tile.Status.OBSTACLE)
 			((ImageView)gp.getChildren().get(hover.y * width + hover.x)).setEffect(new ColorAdjust(0, 0, 0.5, 0));
 		update();
 	};
 	
 	private EventHandler<MouseEvent> handleClick = (e) -> {
-		if (selectionType != SelectionType.NONE && showVisited)
+		if (locked)
+			return;
+		if (showVisited)
 		{
 			clearVisited();
+			clearPath();
 			showVisited = false;
 		}
 		switch (selectionType)
 		{
-		case START:
-			setStart(hover.x, hover.y);
-			break;
-		case END:
-			setEnd(hover.x, hover.y);
-			break;
-		case OBSTACLE:
-			if (e.getEventType() == MouseEvent.MOUSE_PRESSED)
-				createObstacle = getTileStatus(hover.x, hover.y) != Tile.Status.OBSTACLE;
-			if (createObstacle)
-				setObstacle(hover.x, hover.y);
-			else
-				deleteObstacle(hover.x, hover.y);
-			break;
-		case NONE:
-		default:
-			break;
+			case START:
+				setStart(hover.x, hover.y);
+				break;
+			case END:
+				setEnd(hover.x, hover.y);
+				break;
+			case OBSTACLE:
+				if (e.getEventType() == MouseEvent.MOUSE_PRESSED)
+					createObstacle = getTileStatus(hover.x, hover.y) != Tile.Status.OBSTACLE;
+				if (createObstacle)
+					setObstacle(hover.x, hover.y);
+				else
+					deleteObstacle(hover.x, hover.y);
+				break;
+			case NONE:
+			default:
+				break;
 		}
 		update();
 	};
@@ -89,7 +95,6 @@ public class Grid
 		this.width = width;
 		this.height = height;
 		gp = new GridPane();
-
 		gp.setOnMouseMoved(handleHover);
 		gp.setOnMouseDragged((e) -> {
 			handleHover.handle(e);
@@ -277,7 +282,7 @@ public class Grid
 					continue;
 				if (hasObstacle(neighbor.x, neighbor.y) || tile.equals(neighbor))
 					continue;
-				if (x == 1 && y == 1 && hasObstacle(neighbor.x, tile.y) && hasObstacle(tile.x, neighbor.y))
+				if (x != 0 && y != 0 && hasObstacle(neighbor.x, tile.y) && hasObstacle(tile.x, neighbor.y))
 					continue;
 				neighbors.add(neighbor);
 			}
@@ -308,15 +313,7 @@ public class Grid
 		update();
 	}
 	
-	public void clear()
-	{
-		for (Tile t : tiles)
-			if (t.getStatus() != Tile.Status.START && t.getStatus() != Tile.Status.END)
-				t.setStatus(Tile.Status.DEFAULT);
-		update();
-	}
-	
-	public void setVisited(Vector2<Integer> visited)
+	public void setVisitedTile(Vector2<Integer> visited)
 	{
 		showVisited = true;
 		if (getTileStatus(visited.x, visited.y) != Tile.Status.DEFAULT)
@@ -329,7 +326,14 @@ public class Grid
 	{
 		clearPath();
 		if (path == null)
+		{
+			System.out.println("Path search interrupted");
 			return;
+		}
+		if (path.isEmpty())
+		{
+			System.out.println("Unable to find path");
+		}
 		for (Vector2<Integer> coord : path)
 		{
 			if (getTileStatus(coord.x, coord.y) != Tile.Status.DEFAULT && getTileStatus(coord.x, coord.y) != Tile.Status.VISITED )
@@ -337,6 +341,16 @@ public class Grid
 			setTileStatus(coord.x, coord.y, Tile.Status.PATH);
 		}
 		update();
+	}
+	
+	public void lock()
+	{
+		locked = true;
+	}
+	
+	public void unlock()
+	{
+		locked = false;
 	}
 	
 	public boolean validTile(int x, int y)

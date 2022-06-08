@@ -67,6 +67,6 @@
 	</HBox>
 	<VBox prefHeight="250"/>
 	<Button text="Start" onMouseClicked="#start" prefWidth="300" style="-fx-font-size:18px" />
+	<Button text="Stop" onMouseClicked="#stop" prefWidth="300" style="-fx-font-size:18px" />
 	<Button text="Clear Obstacles" onMouseClicked="#clearObstacles" prefWidth="300" style="-fx-font-size:18px" />
-	<Button text="Clear" onMouseClicked="#clear" prefWidth="300" style="-fx-font-size:18px" />
 </VBox>

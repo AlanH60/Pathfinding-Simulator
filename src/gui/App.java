@@ -1,8 +1,12 @@
 package gui;
+import java.io.FileNotFoundException;
+
 import javafx.application.*;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-import javafx.scene.control.SplitPane;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
@@ -15,21 +19,37 @@ public class App extends Application
 		stage.setTitle("Pathfinding Simulator");
 		stage.setScene(new Scene(root, 900, 600));
 		
-		GridPane gridPane = new GridPane();
+		try
+		{
+			GridPane gridPane = new GridPane();
+			Grid grid;
+			grid = new Grid(600 / Tile.WIDTH, 600 / Tile.WIDTH);
+			GridController gc = new GridController(grid);
 
-		Grid grid = new Grid(600 / Tile.WIDTH, 600 / Tile.WIDTH);
+			FXMLLoader loader = new FXMLLoader(getClass().getResource("res/GridController.fxml"));
+			loader.setController(gc);
+			loader.load();
 		
-		GridController gc = new GridController(grid);
+			gridPane.add(grid.getGridPane(), 0, 0);
+			gridPane.add(gc.get(), 1, 0);
 
-		FXMLLoader loader = new FXMLLoader(getClass().getResource("res/GridController.fxml"));
-		loader.setController(gc);
-		loader.load();
-		
-		gridPane.add(grid.getGridPane(), 0, 0);
-		gridPane.add(gc.get(), 1, 0);
-
-		root.getChildren().add(gridPane);
-		stage.show();
+			root.getChildren().add(gridPane);
+			
+			stage.setOnCloseRequest((e) -> {
+				gc.cleanUp();
+			});
+			stage.show();
+		}
+		catch (FileNotFoundException e)
+		{
+			Alert alert = new Alert(AlertType.ERROR);
+			alert.setContentText(e.toString());
+			stage.show();
+			alert.setOnCloseRequest((a) ->{
+				stage.close();
+			});
+			alert.show();
+		}
 		
 	}
 

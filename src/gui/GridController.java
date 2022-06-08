@@ -1,9 +1,10 @@
 package gui;
 
 import java.util.HashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import algorithms.AStar;
-import algorithms.AStarJPS;
 import algorithms.BreadthFirstSearch;
 import algorithms.DepthFirstSearch;
 import algorithms.Dijkstra;
@@ -25,26 +26,26 @@ public class GridController
 	@FXML private ImageView startIcon;
 	@FXML private ImageView endIcon;
 	@FXML private ImageView obstacleIcon;
-	@FXML private ComboBox algorithmSelectionBox;
+	@FXML private ComboBox<String> algorithmSelectionBox;
 	private ImageView selectedIcon;
 	private HashMap<ImageView, Grid.SelectionType> iconToType;
 	private Grid grid;
 	private boolean running = false;
-	Thread t;
+	private ExecutorService threadPool;
 	
 	public GridController(Grid grid)
 	{
 		this.grid = grid;
+		threadPool = Executors.newFixedThreadPool(1);
 	}
 	
 	public VBox get()
 	{
-		iconToType = new HashMap<ImageView, Grid.SelectionType>()
-		{{
-				put(startIcon, Grid.SelectionType.START);
-				put(endIcon, Grid.SelectionType.END);
-				put(obstacleIcon, Grid.SelectionType.OBSTACLE);
-		}};
+		iconToType = new HashMap<ImageView, Grid.SelectionType>();
+		iconToType.put(startIcon, Grid.SelectionType.START);
+		iconToType.put(endIcon, Grid.SelectionType.END);
+		iconToType.put(obstacleIcon, Grid.SelectionType.OBSTACLE);
+
 		return controller;
 	}
 	
@@ -88,6 +89,11 @@ public class GridController
 	@FXML
 	private void start(MouseEvent e)
 	{
+		if (running)
+		{
+			cleanUp();
+			threadPool = Executors.newFixedThreadPool(1);
+		}
 		running = true;
 		endIcon.setEffect(null);
 		startIcon.setEffect(null);
@@ -96,67 +102,65 @@ public class GridController
 		grid.setSelectionType(Grid.SelectionType.NONE);
 		grid.clearVisited();
 		grid.clearPath();
-		long start = System.currentTimeMillis();
+		grid.lock();
 		int selectedAlgorithm = algorithmSelectionBox.getSelectionModel().getSelectedIndex();
 		
 		switch (selectedAlgorithm)
 		{
-		case DIJKSTRA:
-			System.out.print("Dijkstra: ");
-			t = new Thread(
-			() ->
-			{
-				grid.setPath(Dijkstra.dijkstra(grid));
-				running = false;
-			});
-			t.start();
-			break;
-		case ASTAR:
-			System.out.print("A*: ");
-			t = new Thread(
-			() ->
-			{
-				grid.setPath(AStar.aStar(grid));
-				running = false;
-			});
-			t.start();
-			break;
-		case BFS:
-			System.out.print("BFS: ");
-			t = new Thread(
-			() ->
-			{
-				grid.setPath(BreadthFirstSearch.BFS(grid));
-				running = false;
-			});
-			t.start();
-			break;
-		case DFS:
-			System.out.print("DFS: ");
-			t = new Thread(
-			() ->
-			{
-				grid.setPath(DepthFirstSearch.DFS(grid));
-				running = false;
-			});
-			t.start();
-			
-			break;
+			case DIJKSTRA:
+				threadPool.execute(() -> {
+					grid.setPath(Dijkstra.dijkstra(grid));
+					running = false;
+					grid.unlock();
+				});
+				break;
+			case ASTAR:
+				threadPool.execute(() -> {
+					grid.setPath(AStar.aStar(grid));
+					running = false;
+					grid.unlock();
+				});
+				break;
+			case BFS:
+				threadPool.execute(() -> {
+					grid.setPath(BreadthFirstSearch.BFS(grid));
+					running = false;
+					grid.unlock();
+				});
+				break;
+			case DFS:
+				threadPool.execute(() -> {
+					grid.setPath(DepthFirstSearch.DFS(grid));
+					running = false;
+					grid.unlock();
+				});
+				break;
 		}
 		
-		System.out.println("Time Elapsed: " + (System.currentTimeMillis() - start) + " ms");
+	}
+	
+	@FXML
+	private void stop(MouseEvent e)
+	{
+		if (running)
+		{
+			cleanUp();
+			threadPool = Executors.newFixedThreadPool(1);
+		}
 	}
 	
 	@FXML
 	private void clearObstacles(MouseEvent e)
 	{
-		grid.clearObstacles();
+		if (!running)
+			grid.clearObstacles();
 	}
 	
-	@FXML
-	private void clear(MouseEvent e)
+	
+	public void cleanUp()
 	{
-		grid.clear();
+		while (!threadPool.isTerminated())
+			threadPool.shutdownNow();
 	}
 
 }
