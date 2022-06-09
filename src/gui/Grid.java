@@ -13,13 +13,6 @@ import javafx.scene.layout.GridPane;
 
 public class Grid
 {
-	enum SelectionType
-	{
-		START,
-		END,
-		OBSTACLE,
-		NONE
-	}
 	private static Image defaultTile;
 	private static Image startTile;
 	private static Image endTile;
@@ -35,7 +28,7 @@ public class Grid
 	private Vector2<Integer> end = new Vector2<Integer>(0, 0);
 	private Tile[] tiles;
 	private GridPane gp;
-	private SelectionType selectionType = SelectionType.NONE;
+	private Tile.Status selectionType = Tile.Status.DEFAULT;
 	private boolean createObstacle = true;
 	private boolean showVisited = false;
 	private boolean locked = false;
@@ -83,7 +76,7 @@ public class Grid
 				else
 					deleteObstacle(hover.x, hover.y);
 				break;
-			case NONE:
+			case DEFAULT:
 			default:
 				break;
 		}
@@ -249,12 +242,12 @@ public class Grid
 		return gp;
 	}
 	
-	public void setSelectionType(SelectionType selectionType)
+	public void setSelectionType(Tile.Status selectionType)
 	{
 		this.selectionType = selectionType;
 	}
 	
-	public SelectionType getSelectionType()
+	public Tile.Status getSelectionType()
 	{
 		return selectionType;
 	}
@@ -322,18 +315,14 @@ public class Grid
 		update();
 	}
 	
-	public void setPath(ArrayList<Vector2<Integer>> path)
+	public boolean setPath(ArrayList<Vector2<Integer>> path)
 	{
 		clearPath();
 		if (path == null)
-		{
-			System.out.println("Path search interrupted");
-			return;
-		}
+			return true;
 		if (path.isEmpty())
-		{
-			System.out.println("Unable to find path");
-		}
+			return false;
+		
 		for (Vector2<Integer> coord : path)
 		{
 			if (getTileStatus(coord.x, coord.y) != Tile.Status.DEFAULT && getTileStatus(coord.x, coord.y) != Tile.Status.VISITED )
@@ -341,6 +330,7 @@ public class Grid
 			setTileStatus(coord.x, coord.y, Tile.Status.PATH);
 		}
 		update();
+		return true;
 	}
 	
 	public void lock()

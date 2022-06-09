@@ -12,32 +12,43 @@
 <VBox fx:id="controller" xmlns:fx="http://javafx.com/fxml" prefWidth="300" alignment="center">	
 
 	<VBox alignment="center">
-		<padding><Insets top="25" bottom="50" right="0" left="0" /></padding>
+		<padding><Insets top="25" bottom="30" right="0" left="0" /></padding>
 		<Text style="-fx-font: bold 20px Georgia;">Select a Pathfinding  </Text>
 		<Text style="-fx-font: bold 20px Georgia;">Algorithm:</Text>
-		<ComboBox fx:id="algorithmSelectionBox">
-			<items>
-				<FXCollections fx:factory="observableArrayList">
-					<String fx:value="Dijkstra" />
-					<String fx:value="A*" />
-					<String fx:value="Breadth First Search" />
-					<String fx:value="Depth First Search" />
-				</FXCollections>
-			</items>
-		</ComboBox>
+		<HBox alignment="center" spacing="10">
+			<ComboBox fx:id="algorithmSelectionBox">
+				<items>
+					<FXCollections fx:factory="observableArrayList">
+						<String fx:value="" />
+						<String fx:value="Dijkstra" />
+						<String fx:value="A*" />
+						<String fx:value="Breadth First Search" />
+						<String fx:value="Depth First Search" />
+					</FXCollections>
+				</items>
+			</ComboBox>
+			<ImageView fx:id="infoButton" onMouseClicked="#handleInfoButton" onMouseEntered="#handleInfoButton" onMouseExited="#handleInfoButton" fitWidth="15" fitHeight="15">
+				<image>
+					<Image url="@InfoIcon.png" />
+				</image>
+			</ImageView>
+		</HBox>
+		<Label fx:id="warningText" style="-fx-font: bold 12px Georgia; -fx-text-fill: red;"></Label>
 	</VBox>
 	
 	<Label text="Edit Grid:" style="-fx-font:bold 20px Georgia" />
-	
+	<Label text="Select one of the three tile types " style="-fx-font: bold 12px Georgia; -fx-text-fill: blue;"></Label>
+	<Label text="and place them on the grid. " style="-fx-font: bold 12px Georgia; -fx-text-fill: blue;"></Label>
+	<Label text="Hover each tile for more info. " style="-fx-font: bold 12px Georgia; -fx-text-fill: blue;"></Label>
 	<HBox spacing="25" alignment="center">
 		
 		<VBox alignment="center">
 			<HBox alignment="center">
-				<Label text="Start" style="-fx-font:bold 12px Georgia;" />
+				<Label text="Start" style="-fx-font:bold 12px Georgia; " />
 			</HBox>
-			<ImageView fx:id="startIcon" onMouseClicked="#handleIconClick" onMouseEntered="#handleIconHover" onMouseExited="#handleIconHover" fitWidth="35" fitHeight="35">
+			<ImageView fx:id="startIcon" onMouseClicked="#handleIconClick" onMouseEntered="#handleIconHover" onMouseExited="#handleIconHover" onMouseMoved="#handleIconHover" fitWidth="35" fitHeight="35">
 				<image>
-					<Image url="@StartTile.png"/>
+					<Image url="@StartTile.png" />
 				</image>
 			</ImageView>
 		</VBox>
@@ -45,9 +56,9 @@
 			<HBox alignment="center">
 				<Label text="End" style="-fx-font:bold 12px Georgia;" />
 			</HBox>
-			<ImageView fx:id="endIcon" onMouseClicked="#handleIconClick" onMouseEntered="#handleIconHover" onMouseExited="#handleIconHover" fitWidth="35" fitHeight="35">
+			<ImageView fx:id="endIcon" onMouseClicked="#handleIconClick" onMouseEntered="#handleIconHover" onMouseExited="#handleIconHover" onMouseMoved="#handleIconHover" fitWidth="35" fitHeight="35">
 				<image>
-					<Image url="@EndTile.png"/>
+					<Image url="@EndTile.png" />
 				</image>
 			</ImageView>
 		</VBox>
@@ -55,17 +66,35 @@
 			<HBox alignment="center">
 				<Label text="Obstacle" style="-fx-font:bold 12px Georgia;"/>
 			</HBox>
-			<ImageView fx:id="obstacleIcon" onMouseClicked="#handleIconClick" onMouseEntered="#handleIconHover" onMouseExited="#handleIconHover" fitWidth="35" fitHeight="35">
+			<ImageView fx:id="obstacleIcon" onMouseClicked="#handleIconClick" onMouseEntered="#handleIconHover" onMouseExited="#handleIconHover" onMouseMoved="#handleIconHover" fitWidth="35" fitHeight="35">
 				<image>
 					<Image url="@ObstacleTile.png" />
 				</image>
 			</ImageView>
 		</VBox>
-		
-		
-
 	</HBox>
-	<VBox prefHeight="250"/>
+	
+	
+	<VBox spacing="20" prefHeight="220">
+		<padding><Insets top="25" right="150" /></padding>
+		<HBox alignment="center">
+			<ImageView fx:id="visitedIcon" fitWidth="25" fitHeight="25" onMouseEntered="#handleIconHover" onMouseExited="#handleIconHover" onMouseMoved="#handleIconHover">
+				<image>
+					<Image url="@VisitedTile.png" />
+				</image>
+			</ImageView>
+			<Label text=" = Visited" style="-fx-font: bold 12px Georgia; -fx-min-width:100;" />
+		</HBox>
+		
+		<HBox alignment="center">
+			<ImageView fx:id="pathIcon" fitWidth="25" fitHeight="25" onMouseEntered="#handleIconHover" onMouseExited="#handleIconHover" onMouseMoved="#handleIconHover">
+				<image>
+					<Image url="@PathTile.png" />
+				</image>
+			</ImageView>
+			<Label text=" = Path" style="-fx-font: bold 12px Georgia; -fx-min-width:100;" />
+		</HBox>
+	</VBox>
 	<Button text="Start" onMouseClicked="#start" prefWidth="300" style="-fx-font-size:18px" />
 	<Button text="Stop" onMouseClicked="#stop" prefWidth="300" style="-fx-font-size:18px" />
 	<Button text="Clear Obstacles" onMouseClicked="#clearObstacles" prefWidth="300" style="-fx-font-size:18px" />
