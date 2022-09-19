@@ -1,7 +1,5 @@
 package gui;
 import data.Vector2;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
 import javafx.event.EventHandler;
@@ -13,12 +11,12 @@ import javafx.scene.layout.GridPane;
 
 public class Grid
 {
-	private static Image defaultTile;
-	private static Image startTile;
-	private static Image endTile;
-	private static Image pathTile;
-	private static Image obstacleTile;
-	private static Image visitedTile;
+	public static Image defaultTile;
+	public static Image startTile;
+	public static Image endTile;
+	public static Image pathTile;
+	public static Image obstacleTile;
+	public static Image visitedTile;
 	private static boolean imagesLoaded = false;
 
 
@@ -83,7 +81,7 @@ public class Grid
 		update();
 	};
 	
-	public Grid(int width, int height) throws FileNotFoundException
+	public Grid(int width, int height)
 	{
 		this.width = width;
 		this.height = height;
@@ -98,12 +96,12 @@ public class Grid
 		
 		if (!imagesLoaded)
 		{
-			defaultTile = new Image(new FileInputStream("src/gui/res/Tile.png"));
-			startTile = new Image(new FileInputStream("src/gui/res/StartTile.png"));
-			endTile = new Image(new FileInputStream("src/gui/res/EndTile.png"));
-			pathTile = new Image(new FileInputStream("src/gui/res/PathTile.png"));
-			obstacleTile = new Image(new FileInputStream("src/gui/res/ObstacleTile.png"));
-			visitedTile = new Image(new FileInputStream("src/gui/res/VisitedTile.png"));
+			defaultTile = new Image(getClass().getResourceAsStream("/gui/res/Tile.png"));
+			startTile = new Image(getClass().getResourceAsStream("/gui/res/StartTile.png"));
+			endTile = new Image(getClass().getResourceAsStream("/gui/res/EndTile.png"));
+			pathTile = new Image(getClass().getResourceAsStream("/gui/res/PathTile.png"));
+			obstacleTile = new Image(getClass().getResourceAsStream("/gui/res/ObstacleTile.png"));
+			visitedTile = new Image(getClass().getResourceAsStream("/gui/res/VisitedTile.png"));
 			imagesLoaded = true;
 		}
 		

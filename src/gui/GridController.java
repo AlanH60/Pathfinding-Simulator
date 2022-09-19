@@ -1,5 +1,7 @@
 package gui;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
@@ -18,6 +20,7 @@ import javafx.scene.Cursor;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.effect.ColorAdjust;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
@@ -75,6 +78,16 @@ public class GridController
 		iconPopupPane.getChildren().add(iconPopupText);
 		iconHoverPopup.getContent().add(iconPopupPane);
 		infoAlertBox = new Alert(AlertType.CONFIRMATION);
+	}
+	
+	public void setImages()
+	{
+		startIcon.setImage(Grid.startTile);
+		endIcon.setImage(Grid.endTile);
+		obstacleIcon.setImage(Grid.obstacleTile);
+		visitedIcon.setImage(Grid.visitedTile);
+		pathIcon.setImage(Grid.pathTile);
+		infoButton.setImage(new Image(getClass().getResourceAsStream("/gui/res/InfoIcon.png")));
 	}
 	
 	public VBox get()
@@ -247,7 +260,7 @@ public class GridController
 				break;
 			case BFS:
 				threadPool.execute(() -> {
-					if (!grid.setPath(BreadthFirstSearch.BFS(grid)));
+					if (!grid.setPath(BreadthFirstSearch.BFS(grid)))
 						Platform.runLater(()->{ warningText.setText("* Unable to find path"); });
 					running = false;
 					grid.unlock();
